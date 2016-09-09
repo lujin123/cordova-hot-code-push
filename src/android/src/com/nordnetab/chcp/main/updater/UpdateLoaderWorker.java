@@ -27,6 +27,9 @@ import com.nordnetab.chcp.main.utils.URLUtility;
 import java.util.List;
 import java.util.Map;
 
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+
 /**
  * Created by Nikolay Demyankov on 28.07.15.
  * <p/>
@@ -85,7 +88,16 @@ class UpdateLoaderWorker implements WorkerTask {
         }
 
         // check if there is a new content version available
-        if (newContentConfig.getReleaseVersion().equals(oldAppConfig.getContentConfig().getReleaseVersion())) {
+        SimpleDateFormat sdf = new SimpleDateFormat("yyyy.MM.dd-HH.mm.ss");
+        try {
+            long newTmp = sdf.parse(newContentConfig.getReleaseVersion()).getTime();
+            long oldTmp = sdf.parse(oldAppConfig.getContentConfig().getReleaseVersion()).getTime();
+            if (newTmp<=oldTmp) {
+                setNothingToUpdateResult(newAppConfig);
+                return;
+            }
+        } catch (ParseException e) {
+            e.printStackTrace();
             setNothingToUpdateResult(newAppConfig);
             return;
         }
